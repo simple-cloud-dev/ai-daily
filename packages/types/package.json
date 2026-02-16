@@ -1,0 +1,25 @@
+{
+  "name": "@ai-daily/types",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -w -p tsconfig.build.json",
+    "test": "vitest run",
+    "test:smoke": "vitest run src/index.test.ts",
+    "lint": "eslint src --max-warnings=0",
+    "typecheck": "tsc -p tsconfig.build.json --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3.24.2"
+  }
+}

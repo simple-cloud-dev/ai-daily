@@ -1,0 +1,16 @@
+{
+  "name": "@ai-daily/config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "echo \"config: no build step\"",
+    "dev": "echo \"config: no dev step\"",
+    "test": "echo \"config: no tests\"",
+    "lint": "echo \"config: no lint step\"",
+    "typecheck": "echo \"config: no typecheck step\""
+  },
+  "exports": {
+    "./tsconfig/base": "./tsconfig/base.json"
+  }
+}

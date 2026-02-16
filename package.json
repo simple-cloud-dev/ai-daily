@@ -1,0 +1,34 @@
+{
+  "name": "ai-daily",
+  "private": true,
+  "packageManager": "npm@11.6.2",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c blue,green \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "npm run dev --workspace @ai-daily/api",
+    "dev:web": "npm run dev --workspace @ai-daily/web",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:unit": "npm run test --workspaces --if-present",
+    "test:smoke": "npm run test:smoke --workspaces --if-present",
+    "test:integration": "npm run test:integration --workspace @ai-daily/api",
+    "test:e2e": "playwright test",
+    "test:ci": "npm run test:unit && npm run test:integration && npm run test:e2e",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "format": "prettier --check .",
+    "format:write": "prettier --write ."
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^22.13.9",
+    "concurrently": "^9.1.2",
+    "eslint": "^9.21.0",
+    "prettier": "^3.5.2",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.7"
+  }
+}

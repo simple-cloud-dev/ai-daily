@@ -1,0 +1,23 @@
+{
+  "name": "@ai-daily/eslint-config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "echo \"eslint-config: no build step\"",
+    "dev": "echo \"eslint-config: no dev step\"",
+    "test": "echo \"eslint-config: no tests\"",
+    "lint": "echo \"eslint-config: no lint step\"",
+    "typecheck": "echo \"eslint-config: no typecheck step\""
+  },
+  "exports": {
+    ".": "./index.mjs"
+  },
+  "dependencies": {
+    "@eslint/js": "^9.21.0",
+    "@typescript-eslint/eslint-plugin": "^8.25.0",
+    "@typescript-eslint/parser": "^8.25.0",
+    "globals": "^15.15.0",
+    "typescript-eslint": "^8.25.0"
+  }
+}
