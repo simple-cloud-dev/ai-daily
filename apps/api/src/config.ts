@@ -1,5 +1,19 @@
 import { z } from 'zod';
 
+const OptionalEnvStringSchema = z.preprocess((value) => {
+  if (typeof value === 'string' && value.trim() === '') {
+    return undefined;
+  }
+  return value;
+}, z.string().optional());
+
+const OptionalEnvPortSchema = z.preprocess((value) => {
+  if (typeof value === 'string' && value.trim() === '') {
+    return undefined;
+  }
+  return value;
+}, z.coerce.number().int().min(1).max(65535).optional());
+
 const EnvSchema = z
   .object({
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -17,16 +31,16 @@ const EnvSchema = z
     API_WRITE_TOKEN: z.string().min(16).default('dev-write-token-change-me'),
     DATABASE_URL: z.string().min(1).default('postgresql://postgres:postgres@localhost:5432/ai_daily'),
     JWT_SECRET: z.string().min(16).default('dev-jwt-secret-change-me'),
-    GOOGLE_CLIENT_ID: z.string().optional(),
-    OPENAI_API_KEY: z.string().optional(),
+    GOOGLE_CLIENT_ID: OptionalEnvStringSchema,
+    OPENAI_API_KEY: OptionalEnvStringSchema,
     OPENAI_MODEL: z.string().default('gpt-4o-mini'),
-    RESEND_API_KEY: z.string().optional(),
+    RESEND_API_KEY: OptionalEnvStringSchema,
     RESEND_FROM_EMAIL: z.string().email().default('digest@ai-daily.local'),
-    SMTP_HOST: z.string().optional(),
-    SMTP_PORT: z.coerce.number().int().min(1).max(65535).optional(),
-    SMTP_USER: z.string().optional(),
-    SMTP_PASSWORD: z.string().optional(),
-    REDIS_URL: z.string().optional(),
+    SMTP_HOST: OptionalEnvStringSchema,
+    SMTP_PORT: OptionalEnvPortSchema,
+    SMTP_USER: OptionalEnvStringSchema,
+    SMTP_PASSWORD: OptionalEnvStringSchema,
+    REDIS_URL: OptionalEnvStringSchema,
     ENABLE_SCHEDULER: z.coerce.boolean().default(false),
     SCHEDULER_CRON: z.string().default('*/15 * * * *'),
   })
