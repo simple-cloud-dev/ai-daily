@@ -16,7 +16,7 @@ export function createShutdownController(
   lifecycle: AppLifecycle,
   options: ShutdownControllerOptions,
 ): ShutdownController {
-  const onExit = options.onExit ?? process.exit;
+  const onExit = options.onExit ?? ((code: number) => process.exit(code));
   let closePromise: Promise<void> | null = null;
 
   return {

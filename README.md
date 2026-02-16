@@ -1,39 +1,94 @@
-# AI Daily Monorepo
+# AI Daily Digest
 
-## Structure
+Full-stack monorepo for a personalized AI digest platform.
 
-- `apps/web`: React + Vite frontend
-- `apps/api`: Fastify API
-- `packages/types`: shared API contracts and domain types (Zod + inferred TS types)
-- `packages/config`: shared TypeScript config
-- `packages/eslint-config`: shared lint config
-- `docs/architecture`: system boundaries and integration approach
-- `docs/adr`: architecture decision records
+## What is implemented
 
-## Commands
+- Fastify API + React frontend
+- Prisma + PostgreSQL data model for users, preferences, sources, digests, bookmarks, and engagement
+- Auth flows: signup, login, Google token login (dev token fallback), email verification token, password reset token, profile update, account deletion
+- Preferences APIs: delivery emails, schedule/digest settings, source toggles, custom sources, keyword filters
+- Digest pipeline: source fetching (RSS/custom), dedupe, keyword/freshness ranking, AI summarization fallback, digest persistence, email rendering/sending
+- Scheduler: cron-based per-user digest triggering with timezone-aware checks
+- In-app dashboard: onboarding, digest feed/search, bookmarks, read/share tracking, analytics cards
+- Dockerfiles + compose for local deployment
 
-- `npm install`
-- `npm run dev` starts web (`:3000`) and api (`:4000`) in watch mode
-- `npm run build` builds all workspaces in dependency order
-- `npm run test` runs all tests
-- `npm run test:smoke` runs fast smoke checks used as CI entry gate
-- `npm run test:integration` runs API route + Postgres integration tests (Docker required)
-- `npm run test:e2e` runs Playwright smoke against running API + web servers
-- `npm run lint` runs all lint checks
-- `npm run typecheck` runs TypeScript checks
+## Monorepo layout
 
-## API Contract-First Workflow
+- `/apps/api` Fastify backend
+- `/apps/web` React + Vite frontend (Tailwind)
+- `/packages/types` shared contracts
 
-1. Define/modify runtime schemas in `packages/types/src/index.ts`.
-2. Consume inferred TypeScript types from the same package.
-3. Validate API request/response payloads in `apps/api` route/service layers.
-4. Parse API responses in `apps/web` before rendering.
+## Local setup
 
-## DB Layer Approach
+1. Install dependencies:
 
-- Route handlers call services.
-- Services call repository interfaces.
-- Repository implementations depend on a `DatabaseClient` abstraction.
-- Swap `InMemoryDatabaseClient` with a real client (e.g., Postgres) without changing routes/services.
+```bash
+npm install
+```
 
-See `docs/architecture/boundaries.md` and ADRs for details.
+2. Configure env files:
+
+```bash
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env
+```
+
+Set `VITE_GOOGLE_CLIENT_ID` in `/apps/web/.env` to enable browser Google sign-in.
+
+3. Start PostgreSQL (and optional Redis):
+
+```bash
+docker compose up -d postgres redis
+```
+
+4. Run Prisma migration + seed:
+
+```bash
+npm run prisma:migrate --workspace @ai-daily/api
+npm run prisma:seed --workspace @ai-daily/api
+```
+
+5. Run API + web:
+
+```bash
+npm run dev
+```
+
+- Web: `http://localhost:3000`
+- API: `http://localhost:4000`
+
+## Useful commands
+
+```bash
+npm run test
+npm run typecheck
+npm run lint --workspace @ai-daily/web
+npm run prisma:generate --workspace @ai-daily/api
+```
+
+## Docker deployment (local)
+
+```bash
+docker compose up --build
+```
+
+Services:
+
+- web: `http://localhost:3000`
+- api: `http://localhost:4000`
+- postgres: `localhost:5432`
+- redis: `localhost:6379`
+
+## API surface (new endpoints)
+
+- Auth: `/auth/signup`, `/auth/login`, `/auth/google`, `/auth/verify-email`, `/auth/forgot-password`, `/auth/reset-password`, `/auth/logout`, `/me`
+- Preferences: `/preferences`, `/preferences/delivery-emails`, `/preferences/sources`, `/preferences/custom-sources`, `/preferences/keywords`
+- Digests: `/digests`, `/digests/generate`, `/bookmarks`, `/engagement`, `/analytics`
+- Onboarding: `/onboarding/complete`
+
+## Notes
+
+- Google OAuth currently supports verified Google ID tokens and a `dev-google:<email>:<name>` token format for local testing.
+- SMTP is optional. Without SMTP credentials, digest emails are logged in mock mode.
+- Legacy `/daily-summaries` endpoints remain available.

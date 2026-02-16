@@ -1,0 +1,253 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Frequency {
+  DAILY
+  TWICE_DAILY
+  WEEKLY
+  WEEKDAY_ONLY
+}
+
+enum DigestLength {
+  BRIEF
+  STANDARD
+  COMPREHENSIVE
+}
+
+enum SummaryDepth {
+  HEADLINES
+  SHORT
+  DETAILED
+}
+
+enum ContentFormat {
+  GROUPED_BY_SOURCE
+  GROUPED_BY_TOPIC
+  CHRONOLOGICAL
+  RANKED_BY_RELEVANCE
+}
+
+enum SourceCategory {
+  WEB_NEWS
+  SOCIAL_MEDIA
+  RESEARCH_LABS
+  CLOUD
+  UNIVERSITIES
+  CUSTOM
+}
+
+enum SourceType {
+  API
+  RSS
+  SCRAPE
+  KEYWORD
+}
+
+enum DigestStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+enum CustomSourceType {
+  RSS
+  URL
+  KEYWORD
+}
+
+enum EngagementAction {
+  CLICK
+  BOOKMARK
+  SHARE
+  READ
+}
+
+model User {
+  id             String          @id @default(uuid()) @db.Uuid
+  email          String          @unique
+  passwordHash   String?
+  name           String?
+  avatarUrl      String?
+  timezone       String          @default("UTC")
+  emailVerified  DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  deliveryEmails DeliveryEmail[]
+  preferences    UserPreferences?
+  userSources    UserSource[]
+  customSources  CustomSource[]
+  keywords       UserKeyword[]
+  digests        Digest[]
+  bookmarks      Bookmark[]
+  engagementLogs EngagementLog[]
+  emailVerificationTokens EmailVerificationToken[]
+  passwordResetTokens PasswordResetToken[]
+}
+
+model DeliveryEmail {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @db.Uuid
+  email      String
+  isPrimary  Boolean  @default(false)
+  isVerified Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, email])
+}
+
+model UserPreferences {
+  id            String        @id @default(uuid()) @db.Uuid
+  userId        String        @unique @db.Uuid
+  frequency     Frequency     @default(DAILY)
+  deliveryTime  String        @default("08:00")
+  digestLength  DigestLength  @default(STANDARD)
+  summaryDepth  SummaryDepth  @default(SHORT)
+  contentFormat ContentFormat @default(GROUPED_BY_TOPIC)
+  language      String        @default("en")
+  inAppEnabled  Boolean       @default(true)
+  isPaused      Boolean       @default(false)
+  resumeDate    DateTime?
+  weeklyDay     Int?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Source {
+  id        String         @id @default(uuid()) @db.Uuid
+  name      String         @unique
+  category  SourceCategory
+  type      SourceType
+  url       String
+  logoUrl   String?
+  isDefault Boolean        @default(true)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  userSources UserSource[]
+  digestItems DigestItem[]
+}
+
+model UserSource {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  sourceId  String   @db.Uuid
+  isEnabled Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  source Source @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, sourceId])
+}
+
+model CustomSource {
+  id        String           @id @default(uuid()) @db.Uuid
+  userId    String           @db.Uuid
+  name      String
+  type      CustomSourceType
+  value     String
+  isEnabled Boolean          @default(true)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserKeyword {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  keyword   String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, keyword])
+}
+
+model Digest {
+  id          String       @id @default(uuid()) @db.Uuid
+  userId      String       @db.Uuid
+  generatedAt DateTime     @default(now())
+  sentAt      DateTime?
+  status      DigestStatus @default(PENDING)
+  periodStart DateTime?
+  periodEnd   DateTime?
+  createdAt   DateTime     @default(now())
+
+  user  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items DigestItem[]
+}
+
+model DigestItem {
+  id             String   @id @default(uuid()) @db.Uuid
+  digestId       String   @db.Uuid
+  sourceId       String?  @db.Uuid
+  title          String
+  url            String
+  sourceLabel    String
+  summary        String
+  publishedAt    DateTime
+  relevanceScore Float    @default(0)
+  topic          String?
+  createdAt      DateTime @default(now())
+  readAt         DateTime?
+
+  digest    Digest      @relation(fields: [digestId], references: [id], onDelete: Cascade)
+  source    Source?     @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+  bookmarks Bookmark[]
+  logs      EngagementLog[]
+}
+
+model Bookmark {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @db.Uuid
+  digestItemId String   @db.Uuid
+  createdAt    DateTime @default(now())
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  digestItem DigestItem @relation(fields: [digestItemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, digestItemId])
+}
+
+model EngagementLog {
+  id           String           @id @default(uuid()) @db.Uuid
+  userId       String           @db.Uuid
+  digestItemId String           @db.Uuid
+  action       EngagementAction
+  createdAt    DateTime         @default(now())
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  digestItem DigestItem @relation(fields: [digestItemId], references: [id], onDelete: Cascade)
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

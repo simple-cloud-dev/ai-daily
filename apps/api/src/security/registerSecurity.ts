@@ -38,8 +38,9 @@ export function registerSecurity(app: FastifyInstance, config: AppConfig): void 
 
       reply.header('Access-Control-Allow-Origin', origin);
       appendVary(reply, 'Origin');
-      reply.header('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+      reply.header('Access-Control-Allow-Methods', 'GET,POST,PATCH,PUT,DELETE,OPTIONS');
       reply.header('Access-Control-Allow-Headers', 'Authorization,Content-Type');
+      reply.header('Access-Control-Allow-Credentials', 'true');
       reply.header('Access-Control-Max-Age', '600');
     }
 

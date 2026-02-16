@@ -6,6 +6,10 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "start:test": "tsx src/server.ts",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:seed": "tsx prisma/seed.ts",
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/server.js",
     "test": "vitest run --exclude src/**/*.integration.test.ts",
@@ -16,13 +20,29 @@
   },
   "dependencies": {
     "@ai-daily/types": "file:../../packages/types",
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/jwt": "^10.0.0",
+    "@prisma/client": "^6.16.2",
+    "bcrypt": "^6.0.0",
+    "bullmq": "^5.69.3",
     "fastify": "^5.2.1",
+    "google-auth-library": "^10.5.0",
+    "ioredis": "^5.9.3",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^8.0.1",
+    "prisma": "^6.16.2",
+    "rss-parser": "^3.13.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
     "@testcontainers/postgresql": "^11.7.2",
+    "@types/bcrypt": "^6.0.0",
+    "@types/nodemailer": "^7.0.10",
     "@types/pg": "^8.15.5",
     "pg": "^8.16.3",
-    "tsx": "^4.19.3"
+    "tsx": "^4.21.0"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }

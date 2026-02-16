@@ -15,6 +15,20 @@ const EnvSchema = z
     SHUTDOWN_GRACE_PERIOD_MS: z.coerce.number().int().min(1000).default(10_000),
     API_READ_TOKEN: z.string().min(16).default('dev-read-token-change-me'),
     API_WRITE_TOKEN: z.string().min(16).default('dev-write-token-change-me'),
+    DATABASE_URL: z.string().min(1).default('postgresql://postgres:postgres@localhost:5432/ai_daily'),
+    JWT_SECRET: z.string().min(16).default('dev-jwt-secret-change-me'),
+    GOOGLE_CLIENT_ID: z.string().optional(),
+    OPENAI_API_KEY: z.string().optional(),
+    OPENAI_MODEL: z.string().default('gpt-4o-mini'),
+    RESEND_API_KEY: z.string().optional(),
+    RESEND_FROM_EMAIL: z.string().email().default('digest@ai-daily.local'),
+    SMTP_HOST: z.string().optional(),
+    SMTP_PORT: z.coerce.number().int().min(1).max(65535).optional(),
+    SMTP_USER: z.string().optional(),
+    SMTP_PASSWORD: z.string().optional(),
+    REDIS_URL: z.string().optional(),
+    ENABLE_SCHEDULER: z.coerce.boolean().default(false),
+    SCHEDULER_CRON: z.string().default('*/15 * * * *'),
   })
   .transform((env) => ({
     ...env,
@@ -44,6 +58,13 @@ const EnvSchema = z
           code: z.ZodIssueCode.custom,
           message: 'API_WRITE_TOKEN must be set in production',
           path: ['API_WRITE_TOKEN'],
+        });
+      }
+      if (env.JWT_SECRET === 'dev-jwt-secret-change-me') {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'JWT_SECRET must be set in production',
+          path: ['JWT_SECRET'],
         });
       }
     }

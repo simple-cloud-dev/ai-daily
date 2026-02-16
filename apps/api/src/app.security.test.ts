@@ -6,7 +6,7 @@ import type { DailySummaryRepository } from './repositories/dailySummaryReposito
 import { DailySummaryService } from './services/dailySummaryService.js';
 
 function createConfig(overrides: Partial<AppConfig> = {}): AppConfig {
-  return {
+  const defaults: AppConfig = {
     NODE_ENV: 'test',
     PORT: 4000,
     CORS_ALLOWED_ORIGINS: ['http://localhost:5173'],
@@ -19,6 +19,16 @@ function createConfig(overrides: Partial<AppConfig> = {}): AppConfig {
     SHUTDOWN_GRACE_PERIOD_MS: 5_000,
     API_READ_TOKEN: 'test-read-token-1234',
     API_WRITE_TOKEN: 'test-write-token-1234',
+    DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/ai_daily_test',
+    JWT_SECRET: 'test-jwt-secret-123456',
+    OPENAI_MODEL: 'gpt-4o-mini',
+    RESEND_FROM_EMAIL: 'digest@test.local',
+    ENABLE_SCHEDULER: false,
+    SCHEDULER_CRON: '*/15 * * * *',
+  };
+
+  return {
+    ...defaults,
     ...overrides,
   };
 }
